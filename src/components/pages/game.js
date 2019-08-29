@@ -1,6 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useBoard } from "../../hooks/queries/useBoard";
+import { useCurrentBlock } from "../../hooks/queries/useCurrentBlock";
+import { useGameActions } from "../../hooks/commands/useGameActions";
 import BoardBlock from "../game/boardBlock";
 
 const BOARD_WIDTH = "250px";
@@ -20,16 +22,29 @@ const Board = styled.div`
 
 function Game() {
   const board = useBoard();
+  const currentBlock = useCurrentBlock();
+  const { moveBlock } = useGameActions();
   // const canvasRef = useRef(null);
   console.log("GOT BOARD: ", board);
   // if (canvasRef.current !== null) {
   //   drawGridLines(canvasRef.current);
-  // }
+  //
+  useEffect(() => {
+    console.log("the currentBlock: ", currentBlock);
+    const interval = setInterval(function() {
+      moveBlock({ block: currentBlock || T_BLOCK, direction: "DOWN" });
+    }, 50);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [currentBlock]);
+
   return (
     <Board>
       {/* <canvas ref={canvasRef} /> */}
       <>
-        <BoardBlock block={T_BLOCK} />
+        <BoardBlock block={currentBlock || T_BLOCK} />
         {/* {board.map(({ block, colIndex, rowIndex }) => (
           <BoardBlock
             position={{ colIndex, rowIndex }}
