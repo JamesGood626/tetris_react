@@ -4,9 +4,10 @@ import { moveBlockAction } from "../../store/actions/game";
 export function useGameActions() {
   const dispatch = useDispatch();
 
-  const moveBlock = ({ block, direction = "" }) => {
+  const moveBlock = ({ board, block, direction = "" }) => {
     dispatch(
       moveBlockAction({
+        board,
         block,
         direction
       })

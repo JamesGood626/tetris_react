@@ -1,67 +1,48 @@
-import { MOVE_BLOCK } from "../actions/game";
+import {
+  MOVE_BLOCK,
+  CHANGE_BLOCK_ORIENTATION,
+  SET_BLOCK,
+  GENERATE_BLOCKS,
+  CLEAR_ROWS
+} from "../actions/game";
+import {
+  generateBlockBag,
+  initializeBoardObj,
+  updateBlockCoords
+} from "../helpers";
 
-// const boardArr = Array(20).fill(Array(10).fill(0));
+// Okay, so according this this link: https://tetris.fandom.com/wiki/Random_Generator
+// 7 tetrominos (one of each) are generated in a random permutation, as if they were drawn out of a bag.
+// Giving 5,040 different permutations.
+// How would you go about creating such an algorithm?
+// I'll implement a naive solution for now to keep progress moving along...
 const initialGameState = {
+  level: 1,
+  score: 0,
   board: initializeBoardObj(),
-  currentBlock: null // TODO: create the randomly generated number thing for choosing next block.
+  currentBlock: generateBlockBag(1), // TODO: create the randomly generated number thing for choosing next block.
+  nextBlocks: generateBlockBag(7),
+  // Maintaining this array is necessary to facilitate
+  // rendering the set blocks to the board.
+  setBlocks: []
 };
-
-function initializeBoardObj() {
-  // 0 - 19 representative of 20
-  const ROWS = 19;
-  // 0 - 9 representative of 10
-  const COLUMNS = 9;
-  const board = {};
-  for (let row = 0; row <= ROWS; row++) {
-    for (let col = 0; col <= COLUMNS; col++) {
-      board[`row-${row}_col-${col}`] = 0;
-    }
-  }
-  return board;
-}
 
 export function gameReducer(gameState = initialGameState, { type, payload }) {
   if (type === MOVE_BLOCK)
     return {
       ...gameState,
-      currentBlock: updateBlockCoords(gameState.board, payload)
+      currentBlock: payload.block // updateBlockCoords(gameState.board, payload)
     };
-  // Future actions to add:
+  if (type === CHANGE_BLOCK_ORIENTATION) return { ...gameState };
   // SET_BLOCK <- this will trigger clear rows check
+  if (type === SET_BLOCK) return { ...gameState };
+  if (type === GENERATE_BLOCKS) return { ...gameState };
+  if (type === CLEAR_ROWS) return { ...gameState };
   return gameState;
 }
 
-// const O_BLOCK = [
-//   { colIndex: 4, rowIndex: 0, type: "O" },
-//   { colIndex: 5, rowIndex: 0, type: "O", pivotPoint: true },
-//   { colIndex: 4, rowIndex: 1, type: "O" },
-//   { colIndex: 5, rowIndex: 1, type: "O" }
-// ];
-// When direction === "DOWN" -> Add 1 to each object in the array's rowIndex
-// When direction === "LEFT" -> Subtract 1 to each object in the array's colIndex
-// When direction === "RIGHT" -> Add 1 to each object in the array's colIndex
-// (then check to ensure no collision before finalizing the state to be returned from the reducer)
-function updateBlockCoords(board, { block, direction }) {
-  const operation = generateShiftOperation(direction);
-  return block.map(unit => operation(unit));
-}
-
-// NOTE:
-// This should really be happening in middleware... because
-// if it's not possible to move the block further down, then you'll want to
-// not finish this action, but instead fire off the SET_BLOCK action.
-// If it is valid, then and only then, should the updated block object reach the
-// reducer to be returned as the newly updated state.
-function generateShiftOperation(direction) {
-  if (direction === "DOWN")
-    return obj => ({ ...obj, rowIndex: obj.rowIndex + 1 });
-  if (direction === "LEFT")
-    return obj => ({ ...obj, colIndex: obj.colIndex - 1 });
-  if (direction === "RIGHT")
-    return obj => ({ ...obj, colIndex: obj.colIndex + 1 });
-}
-
 // My first attempt at modeling the board:
+// const boardArr = Array(20).fill(Array(10).fill(0));
 // const boardArr = [
 //   [
 //     0,
