@@ -35,10 +35,28 @@ export function gameReducer(gameState = initialGameState, { type, payload }) {
     };
   if (type === CHANGE_BLOCK_ORIENTATION) return { ...gameState };
   // SET_BLOCK <- this will trigger clear rows check
-  if (type === SET_BLOCK) return { ...gameState };
+  if (type === SET_BLOCK) return setBlockStateUpdate(gameState, payload);
   if (type === GENERATE_BLOCKS) return { ...gameState };
   if (type === CLEAR_ROWS) return { ...gameState };
   return gameState;
+}
+
+function setBlockStateUpdate(gameState, { block }) {
+  const nextBlock = gameState.nextBlocks.shift();
+  const rowColKeys = block.map(
+    ({ rowIndex, colIndex }) => `row-${rowIndex}_col-${colIndex}`
+  );
+  console.log("THE ROWCOLKEYS: ", rowColKeys);
+  rowColKeys.forEach(key => {
+    gameState.board[key] = 1;
+    console.log("the key in rowColKeys: ", key);
+    console.log("the gameState.board: ", gameState.board);
+  });
+  return {
+    ...gameState,
+    currentBlock: nextBlock,
+    setBlocks: [...gameState.setBlocks, block]
+  };
 }
 
 // My first attempt at modeling the board:

@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useBoard } from "../../hooks/queries/useBoard";
 import { useCurrentBlock } from "../../hooks/queries/useCurrentBlock";
+import { useSetBlocks } from "../../hooks/queries/useSetBlocks";
 import { useGameActions } from "../../hooks/commands/useGameActions";
 import BoardBlock from "../game/boardBlock";
 
@@ -22,6 +23,7 @@ const Board = styled.div`
 
 function Game() {
   const board = useBoard();
+  const setBlocks = useSetBlocks();
   const currentBlock = useCurrentBlock();
   const { moveBlock } = useGameActions();
   // const canvasRef = useRef(null);
@@ -31,21 +33,27 @@ function Game() {
   //
   useEffect(() => {
     console.log("the currentBlock: ", currentBlock);
-    console.log("board in useEffect: ", board)
+    // console.log("board in useEffect: ", board);
     const interval = setInterval(function() {
+      console.log("calling moveBlock w/  currentBlock: ", currentBlock);
       moveBlock({ board, block: currentBlock, direction: "DOWN" });
-    }, 1000);
+    }, 300);
 
     return () => {
+      console.log("CLEAR INTERVAL RUNNING!!!!");
       clearInterval(interval);
     };
   }, [currentBlock]);
 
+  console.log("game re-rendering");
   return (
     <Board>
       {/* <canvas ref={canvasRef} /> */}
       <>
         <BoardBlock block={currentBlock} />
+        {setBlocks.map(block => (
+          <BoardBlock block={block} />
+        ))}
       </>
     </Board>
   );

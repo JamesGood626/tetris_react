@@ -5,13 +5,12 @@ const middleware = ({ dispatch }) => next => action => {
   if (action.type === MOVE_BLOCK) {
     const { board, block, direction } = action.payload;
     const [coordKeys, updatedBlock] = updateBlockCoords({
-      block: block,
-      direction: direction
+      block,
+      direction
     });
     // Still need to check that the move wouldn't cause the block
     // to be outside of board bounds.
     const noCollision = coordKeys.every(rowColKey => {
-      console.log("WHAT THE FUCK IS BOARD: ", board);
       if (board.hasOwnProperty(rowColKey)) {
         return board[rowColKey] === 0;
       } else {
@@ -23,11 +22,14 @@ const middleware = ({ dispatch }) => next => action => {
       action.payload.block = updatedBlock;
       next(action);
     } else {
+      console.log("Dispatching setBlockAction w/ block: ", block);
       dispatch(setBlockAction({ block }));
     }
   }
 
-  // next(action);
+  if (action.type === SET_BLOCK) {
+    next(action);
+  }
 };
 
 export default middleware;
