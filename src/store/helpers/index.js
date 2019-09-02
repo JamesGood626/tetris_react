@@ -8,7 +8,8 @@ import {
   I_BLOCK
 } from "./blocks";
 
-export function initializeBoardObj() {
+// deprecated for now...
+function initializeBoardObj() {
   // 0 - 19 representative of 20
   const ROWS = 19;
   // 0 - 9 representative of 10
@@ -22,20 +23,17 @@ export function initializeBoardObj() {
   return board;
 }
 
+export function initializeBoardArr() {
+  // 0 - 9 representative of 10 columns
+  // 0 - 19 representative of 20 rows
+  return Array(20).fill(Array(10).fill(0));
+}
+
 export function generateBlockBag(amount) {
   if (amount === 1) return L_BLOCK;
   return [O_BLOCK, T_BLOCK, S_BLOCK, L_BLOCK, I_BLOCK, Z_BLOCK, J_BLOCK];
 }
 
-// const O_BLOCK = [
-//   { colIndex: 4, rowIndex: 0, type: "O" },
-//   { colIndex: 5, rowIndex: 0, type: "O", pivotPoint: true },
-//   { colIndex: 4, rowIndex: 1, type: "O" },
-//   { colIndex: 5, rowIndex: 1, type: "O" }
-// ];
-// When direction === "DOWN" -> Add 1 to each object in the array's rowIndex
-// When direction === "LEFT" -> Subtract 1 to each object in the array's colIndex
-// When direction === "RIGHT" -> Add 1 to each object in the array's colIndex
 // (then check to ensure no collision before finalizing the state to be returned from the reducer)
 export function updateBlockCoords({ block, direction }) {
   const operation = generateShiftOperation(direction);
@@ -44,13 +42,54 @@ export function updateBlockCoords({ block, direction }) {
       const updatedCoords = operation(unit);
       acc[0] = [
         ...acc[0],
-        `row-${updatedCoords.rowIndex}_col-${updatedCoords.colIndex}`
+        { rowIndex: updatedCoords.rowIndex, colIndex: updatedCoords.colIndex }
       ];
       acc[1] = [...acc[1], updatedCoords];
       return acc;
     },
     [[], []]
   );
+}
+
+// TODO: Should I fire off the CHECK_ROWS here?...
+//       or do it right after the dispatch of SET_BLOCK that occurs
+//       in the middleware?... How would I trigger the flash disappear animation
+//       if I really cared about such a detail...?
+export function setBlockStateUpdate(gameState, { block }) {
+  console.log("SET BLOCK STATE UPDATE CALLED");
+  const nextBlock = gameState.nextBlocks.shift();
+  // BUG:
+  // block.forEach(({ rowIndex, colIndex }) => {
+  //   console.log(`rowIndex: ${rowIndex} && colIndex: ${colIndex}`);
+  //   This line is the problem. You can modify the row, but attempting
+  //   to update the column value in this manner causes the really strange
+  //   bug... where the board is mutated before this function is ever invoked...
+  //   gameState.board[rowIndex][colIndex] = 1;
+  // });
+
+  // If gameState.nextBlocks === 0
+  // dispatch GENERATE_BLOCKS...
+  // Really, handling this inside of middleware would've been the ideal solution... but
+  // this is the best that can be done for now.
+  return {
+    ...gameState,
+    board: updateBoard(gameState.board, block),
+    currentBlock: nextBlock,
+    setBlocks: [...gameState.setBlocks, ...block]
+  };
+}
+
+function updateBoard(board, block) {
+  const newBoard = [...board];
+  block.forEach(({ rowIndex, colIndex }) => {
+    // This has fixed the bug above. See comment annotated w/ BUG
+    newBoard[rowIndex] = [
+      ...newBoard[rowIndex].slice(0, colIndex),
+      1,
+      ...newBoard[rowIndex].slice(colIndex + 1)
+    ];
+  });
+  return newBoard;
 }
 
 // NOTE:

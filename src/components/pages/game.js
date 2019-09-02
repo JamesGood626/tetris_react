@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useBoard } from "../../hooks/queries/useBoard";
 import { useCurrentBlock } from "../../hooks/queries/useCurrentBlock";
@@ -26,34 +26,27 @@ function Game() {
   const setBlocks = useSetBlocks();
   const currentBlock = useCurrentBlock();
   const { moveBlock } = useGameActions();
-  // const canvasRef = useRef(null);
-  console.log("GOT BOARD: ", board);
-  // if (canvasRef.current !== null) {
-  //   drawGridLines(canvasRef.current);
-  //
+
   useEffect(() => {
-    console.log("the currentBlock: ", currentBlock);
-    // console.log("board in useEffect: ", board);
     const interval = setInterval(function() {
-      console.log("calling moveBlock w/  currentBlock: ", currentBlock);
+      console.log("the board in the setInterval function: ", board);
       moveBlock({ board, block: currentBlock, direction: "DOWN" });
     }, 300);
 
     return () => {
-      console.log("CLEAR INTERVAL RUNNING!!!!");
       clearInterval(interval);
     };
-  }, [currentBlock]);
+  }, [board, currentBlock]);
 
-  console.log("game re-rendering");
   return (
     <Board>
-      {/* <canvas ref={canvasRef} /> */}
       <>
         <BoardBlock block={currentBlock} />
-        {setBlocks.map(block => (
-          <BoardBlock block={block} />
-        ))}
+        {/*
+          TODO: Should create a separate functional component for this
+          that way it can be memoized.
+        */}
+        <BoardBlock block={setBlocks} />
       </>
     </Board>
   );
@@ -71,36 +64,5 @@ function Game() {
 
 // When the block gets set, the board (which is an object w/ keys of `${row}_${col}`) will be
 // updated to facilitate checking for non-collisions.
-
-function drawGridLines(canvas) {
-  console.log("got canvas: ", canvas);
-  //Always check for properties and methods, to make sure your code doesn't break in other browsers.
-  if (canvas.getContext) {
-    var context = canvas.getContext("2d");
-    context.strokeStyle = "#222222";
-    context.lineWidth = 0.2;
-    // Reset the current path
-    context.beginPath();
-    // Staring point
-    context.moveTo(0, (canvas.height / 20) * 1);
-    // End point
-    context.lineTo(canvas.width, (canvas.height / 20) * 1);
-    context.closePath();
-    context.stroke();
-
-    context.beginPath();
-    context.moveTo(0, (canvas.height / 20) * 2);
-    context.lineTo(canvas.width, (canvas.height / 20) * 2);
-    context.closePath();
-    // Make the line visible
-    context.stroke();
-
-    context.beginPath();
-    context.moveTo(0, (canvas.height / 20) * 3);
-    context.lineTo(canvas.width, (canvas.height / 20) * 3);
-    context.closePath();
-    context.stroke();
-  }
-}
 
 export default Game;

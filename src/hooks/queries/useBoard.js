@@ -6,7 +6,10 @@ import { useSelector } from "react-redux";
 // But for moving a block, you should only return the updated block object (the
 // object which contains it's board coords)
 export function useBoard() {
-  return useSelector(state => state.game.board);
+  return useSelector(state => {
+    // console.log("the board in the useBoard function: ", state.game.board);
+    return state.game.board;
+  });
 }
 
 // Was using for the array of arrays board setup... but w/ object this

@@ -5,6 +5,7 @@ export function useGameActions() {
   const dispatch = useDispatch();
 
   const moveBlock = ({ board, block, direction = "" }) => {
+    console.log("dispatching board: ", board);
     dispatch(
       moveBlockAction({
         board,

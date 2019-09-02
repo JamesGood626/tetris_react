@@ -7,8 +7,9 @@ import {
 } from "../actions/game";
 import {
   generateBlockBag,
-  initializeBoardObj,
-  updateBlockCoords
+  initializeBoardArr,
+  updateBlockCoords,
+  setBlockStateUpdate
 } from "../helpers";
 
 // Okay, so according this this link: https://tetris.fandom.com/wiki/Random_Generator
@@ -19,8 +20,8 @@ import {
 const initialGameState = {
   level: 1,
   score: 0,
-  board: initializeBoardObj(),
-  currentBlock: generateBlockBag(1), // TODO: create the randomly generated number thing for choosing next block.
+  board: initializeBoardArr(),
+  currentBlock: generateBlockBag(1),
   nextBlocks: generateBlockBag(7),
   // Maintaining this array is necessary to facilitate
   // rendering the set blocks to the board.
@@ -28,38 +29,33 @@ const initialGameState = {
 };
 
 export function gameReducer(gameState = initialGameState, { type, payload }) {
-  if (type === MOVE_BLOCK)
+  if (type === MOVE_BLOCK) {
+    console.log("STATE BEING RETURNED FROM MOVE_BLOCK ACTION: ", gameState);
     return {
       ...gameState,
       currentBlock: payload.block // updateBlockCoords(gameState.board, payload)
     };
+  }
+
   if (type === CHANGE_BLOCK_ORIENTATION) return { ...gameState };
   // SET_BLOCK <- this will trigger clear rows check
-  if (type === SET_BLOCK) return setBlockStateUpdate(gameState, payload);
+  // NOTE:
+  // If the gameState.nextBlocks is equal to 1 before setBlockStateUpdate executes,
+  // then it will dispatch a GENERATE_BLOCKS action.
+  if (type === SET_BLOCK) {
+    console.log("gameState.board before setBlockStateUpdate");
+    console.log(gameState.board);
+    return setBlockStateUpdate(gameState, payload);
+  }
   if (type === GENERATE_BLOCKS) return { ...gameState };
   if (type === CLEAR_ROWS) return { ...gameState };
   return gameState;
 }
 
-function setBlockStateUpdate(gameState, { block }) {
-  const nextBlock = gameState.nextBlocks.shift();
-  const rowColKeys = block.map(
-    ({ rowIndex, colIndex }) => `row-${rowIndex}_col-${colIndex}`
-  );
-  console.log("THE ROWCOLKEYS: ", rowColKeys);
-  rowColKeys.forEach(key => {
-    gameState.board[key] = 1;
-    console.log("the key in rowColKeys: ", key);
-    console.log("the gameState.board: ", gameState.board);
-  });
-  return {
-    ...gameState,
-    currentBlock: nextBlock,
-    setBlocks: [...gameState.setBlocks, block]
-  };
-}
-
 // My first attempt at modeling the board:
+// And on Aug 31st, 2019 After some reconsideration...
+// this structure will work fine for detecting collision...
+// and also to facilitate checking/clearing rows.
 // const boardArr = Array(20).fill(Array(10).fill(0));
 // const boardArr = [
 //   [
