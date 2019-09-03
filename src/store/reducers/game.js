@@ -2,8 +2,9 @@ import {
   MOVE_BLOCK,
   CHANGE_BLOCK_ORIENTATION,
   SET_BLOCK,
-  GENERATE_BLOCKS,
-  CLEAR_ROWS
+  GENERATE_NEXT_BLOCKS,
+  CLEAR_ROWS,
+  GAME_OVER
 } from "../actions/game";
 import {
   generateBlockBag,
@@ -25,12 +26,12 @@ const initialGameState = {
   nextBlocks: generateBlockBag(7),
   // Maintaining this array is necessary to facilitate
   // rendering the set blocks to the board.
-  setBlocks: []
+  setBlocks: [],
+  gameOver: false
 };
 
 export function gameReducer(gameState = initialGameState, { type, payload }) {
   if (type === MOVE_BLOCK) {
-    console.log("STATE BEING RETURNED FROM MOVE_BLOCK ACTION: ", gameState);
     return {
       ...gameState,
       currentBlock: payload.block // updateBlockCoords(gameState.board, payload)
@@ -43,12 +44,12 @@ export function gameReducer(gameState = initialGameState, { type, payload }) {
   // If the gameState.nextBlocks is equal to 1 before setBlockStateUpdate executes,
   // then it will dispatch a GENERATE_BLOCKS action.
   if (type === SET_BLOCK) {
-    console.log("gameState.board before setBlockStateUpdate");
-    console.log(gameState.board);
     return setBlockStateUpdate(gameState, payload);
   }
-  if (type === GENERATE_BLOCKS) return { ...gameState };
+  if (type === GENERATE_NEXT_BLOCKS)
+    return { ...gameState, nextBlocks: generateBlockBag(7) };
   if (type === CLEAR_ROWS) return { ...gameState };
+  if (type === GAME_OVER) return { ...gameState, gameOver: payload.gameOver };
   return gameState;
 }
 

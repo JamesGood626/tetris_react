@@ -1,11 +1,18 @@
-import { MOVE_BLOCK, SET_BLOCK, setBlockAction } from "../actions/game";
+import {
+  MOVE_BLOCK,
+  SET_BLOCK,
+  GENERATE_NEXT_BLOCKS,
+  setBlockAction,
+  generateNextBlocksAction
+} from "../actions/game";
 import { updateBlockCoords } from "../helpers";
 
-const middleware = ({ dispatch }) => next => action => {
-  console.log("the board in the middleware: ", action.payload.board);
+// uvloop
+// TODO:
+// Need to handle collision logic for checking gameOver
+const middleware = ({ dispatch, getState }) => next => action => {
   if (action.type === MOVE_BLOCK) {
     const { block, direction } = action.payload;
-    console.log("the board in MOVE_BLOCK if statement: ", action.payload.board);
     const [coordKeys, updatedBlock] = updateBlockCoords({
       block,
       direction
@@ -20,21 +27,26 @@ const middleware = ({ dispatch }) => next => action => {
         return false;
       }
     });
-    console.log("the board after noCollision check: ", action.payload.board);
+
     if (noCollision) {
       action.payload.block = updatedBlock;
-      console.log(
-        "action.payload being passed to the next function: ",
-        action.payload
-      );
       return next(action);
     } else {
-      console.log("Dispatching setBlockAction w/ block: ", block);
-      return next(setBlockAction({ block }));
+      return dispatch(setBlockAction({ block }));
     }
   }
 
   if (action.type === SET_BLOCK) {
+    const {
+      game: { nextBlocks }
+    } = getState();
+    if (nextBlocks.length === 0) {
+      dispatch(generateNextBlocksAction());
+    }
+    return next(action);
+  }
+
+  if (action.type === GENERATE_NEXT_BLOCKS) {
     return next(action);
   }
 };

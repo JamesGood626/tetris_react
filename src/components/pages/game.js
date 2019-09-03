@@ -1,8 +1,11 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import { useBoard } from "../../hooks/queries/useBoard";
-import { useCurrentBlock } from "../../hooks/queries/useCurrentBlock";
-import { useSetBlocks } from "../../hooks/queries/useSetBlocks";
+import {
+  useGameOver,
+  useBoard,
+  useCurrentBlock,
+  useSetBlocks
+} from "../../hooks/queries";
 import { useGameActions } from "../../hooks/commands/useGameActions";
 import BoardBlock from "../game/boardBlock";
 
@@ -22,6 +25,7 @@ const Board = styled.div`
 `;
 
 function Game() {
+  const gameOver = useGameOver();
   const board = useBoard();
   const setBlocks = useSetBlocks();
   const currentBlock = useCurrentBlock();
@@ -29,14 +33,22 @@ function Game() {
 
   useEffect(() => {
     const interval = setInterval(function() {
-      console.log("the board in the setInterval function: ", board);
-      moveBlock({ board, block: currentBlock, direction: "DOWN" });
-    }, 300);
+      // console.log("the board in the setInterval function: ", board);
+      moveBlock({
+        board,
+        block: currentBlock,
+        direction: "DOWN"
+      });
+    }, 100);
 
     return () => {
       clearInterval(interval);
     };
   }, [board, currentBlock]);
+
+  if (gameOver) {
+    return <h1>Game Over!</h1>;
+  }
 
   return (
     <Board>

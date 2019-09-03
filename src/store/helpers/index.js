@@ -71,6 +71,7 @@ export function setBlockStateUpdate(gameState, { block }) {
   // dispatch GENERATE_BLOCKS...
   // Really, handling this inside of middleware would've been the ideal solution... but
   // this is the best that can be done for now.
+
   return {
     ...gameState,
     board: updateBoard(gameState.board, block),

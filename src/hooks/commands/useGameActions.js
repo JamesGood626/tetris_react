@@ -1,11 +1,13 @@
 import { useDispatch } from "react-redux";
-import { moveBlockAction } from "../../store/actions/game";
+import {
+  moveBlockAction,
+  generateNextBlocksAction
+} from "../../store/actions/game";
 
 export function useGameActions() {
   const dispatch = useDispatch();
 
   const moveBlock = ({ board, block, direction = "" }) => {
-    console.log("dispatching board: ", board);
     dispatch(
       moveBlockAction({
         board,
@@ -15,5 +17,9 @@ export function useGameActions() {
     );
   };
 
-  return { moveBlock };
+  const generateNextBlocks = () => {
+    dispatch(generateNextBlocksAction());
+  };
+
+  return { moveBlock, generateNextBlocks };
 }
