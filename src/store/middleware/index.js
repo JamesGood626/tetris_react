@@ -2,6 +2,7 @@ import {
   MOVE_BLOCK,
   SET_BLOCK,
   GENERATE_NEXT_BLOCKS,
+  spawnBlockAction,
   setBlockAction,
   generateNextBlocksAction
 } from "../actions/game";
@@ -49,6 +50,8 @@ const middleware = ({ dispatch, getState }) => next => action => {
   if (action.type === GENERATE_NEXT_BLOCKS) {
     return next(action);
   }
+
+  return next(action);
 };
 
 const withinBoardBounds = (row, col) =>

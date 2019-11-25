@@ -1,4 +1,5 @@
 import {
+  SPAWN_BLOCK,
   MOVE_BLOCK,
   CHANGE_BLOCK_ORIENTATION,
   SET_BLOCK,
@@ -31,6 +32,13 @@ const initialGameState = {
 };
 
 export function gameReducer(gameState = initialGameState, { type, payload }) {
+  if (type === SPAWN_BLOCK) {
+    const nextBlock = gameState.nextBlocks.shift();
+    return {
+      ...gameState,
+      currentBlock: nextBlock
+    };
+  }
   if (type === MOVE_BLOCK) {
     return {
       ...gameState,
@@ -40,9 +48,6 @@ export function gameReducer(gameState = initialGameState, { type, payload }) {
 
   if (type === CHANGE_BLOCK_ORIENTATION) return { ...gameState };
   // SET_BLOCK <- this will trigger clear rows check
-  // NOTE:
-  // If the gameState.nextBlocks is equal to 1 before setBlockStateUpdate executes,
-  // then it will dispatch a GENERATE_BLOCKS action.
   if (type === SET_BLOCK) {
     return setBlockStateUpdate(gameState, payload);
   }

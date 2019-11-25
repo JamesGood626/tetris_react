@@ -1,9 +1,23 @@
+export const SPAWN_BLOCK = "SPAWN_BLOCK";
 export const MOVE_BLOCK = "MOVE_BLOCK";
 export const CHANGE_BLOCK_ORIENTATION = "CHANGE_BLOCK_ORIENTATION";
 export const SET_BLOCK = "SET_BLOCK";
 export const GENERATE_NEXT_BLOCKS = "GENERATE_NEXT_BLOCKS";
 export const CLEAR_ROWS = "CLEAR_ROWS";
 export const GAME_OVER = "GAME_OVER";
+
+export function spawnBlockAction({ board }) {
+  return {
+    type: SPAWN_BLOCK,
+    payload: {
+      board
+    },
+    meta: {
+      action:
+        "Spawn tetromino onto the board and ensure no collisions exist that would end the game."
+    }
+  };
+}
 
 export function moveBlockAction({ board, block, direction }) {
   return {
@@ -20,7 +34,6 @@ export function moveBlockAction({ board, block, direction }) {
 }
 
 export function generateNextBlocksAction() {
-  console.log("generateNextBlocksAction invoked");
   return {
     type: GENERATE_NEXT_BLOCKS,
     meta: {
@@ -43,7 +56,6 @@ export function changeBlockOrientationAction({ block }) {
 }
 
 export function setBlockAction({ block }) {
-  console.log("SET_BLOCK FIRED!");
   return {
     type: SET_BLOCK,
     payload: {

@@ -56,8 +56,7 @@ export function updateBlockCoords({ block, direction }) {
 //       in the middleware?... How would I trigger the flash disappear animation
 //       if I really cared about such a detail...?
 export function setBlockStateUpdate(gameState, { block }) {
-  console.log("SET BLOCK STATE UPDATE CALLED");
-  const nextBlock = gameState.nextBlocks.shift();
+  // const nextBlock = gameState.nextBlocks.shift();
   // BUG:
   // block.forEach(({ rowIndex, colIndex }) => {
   //   console.log(`rowIndex: ${rowIndex} && colIndex: ${colIndex}`);
@@ -75,7 +74,7 @@ export function setBlockStateUpdate(gameState, { block }) {
   return {
     ...gameState,
     board: updateBoard(gameState.board, block),
-    currentBlock: nextBlock,
+    currentBlock: null,
     setBlocks: [...gameState.setBlocks, ...block]
   };
 }

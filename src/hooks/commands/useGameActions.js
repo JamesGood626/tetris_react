@@ -1,5 +1,6 @@
 import { useDispatch } from "react-redux";
 import {
+  spawnBlockAction,
   moveBlockAction,
   generateNextBlocksAction
 } from "../../store/actions/game";
@@ -17,9 +18,14 @@ export function useGameActions() {
     );
   };
 
+  const spawnBlock = ({ board }) => {
+    // console.log("got spawnBlock block: ", board);
+    dispatch(spawnBlockAction({ board }));
+  };
+
   const generateNextBlocks = () => {
     dispatch(generateNextBlocksAction());
   };
 
-  return { moveBlock, generateNextBlocks };
+  return { spawnBlock, moveBlock, generateNextBlocks };
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
   useGameOver,
@@ -7,7 +7,19 @@ import {
   useSetBlocks
 } from "../../hooks/queries";
 import { useGameActions } from "../../hooks/commands/useGameActions";
+import Controls from "../game/controls";
 import BoardBlock from "../game/boardBlock";
+import SetBlocks from "../game/setBlocks";
+
+// Fix styled components warning:
+// backend.js:1 Over 200 classes were generated for component styled.div.
+// Consider using the attrs method, together with a style object for frequently changed styles.
+// Example:
+//   const Component = styled.div.attrs({
+//     style: ({ background }) => ({
+//       background,
+//     }),
+//   })`width: 100%;`
 
 const BOARD_WIDTH = "250px";
 const BOARD_HEIGHT = "500px";
@@ -24,43 +36,117 @@ const Board = styled.div`
   }
 `;
 
+const dropRates = {
+  1: 500,
+};
+
 function Game() {
+  const [level, setLevel] = useState(1);
+  const [delay, setDelay] = useState(true);
+  const [dropRate, setDropRate] = useState({
+    default: dropRates[1],
+    increased: null
+  });
   const gameOver = useGameOver();
   const board = useBoard();
   const setBlocks = useSetBlocks();
   const currentBlock = useCurrentBlock();
-  const { moveBlock } = useGameActions();
+  const { spawnBlock, moveBlock } = useGameActions();
 
   useEffect(() => {
-    const interval = setInterval(function() {
-      // console.log("the board in the setInterval function: ", board);
-      moveBlock({
-        board,
-        block: currentBlock,
-        direction: "DOWN"
-      });
-    }, 100);
+    console.log("the dropRate: ", dropRate);
+    const interval = setInterval(
+      function() {
+        // console.log("the board in the setInterval function: ", board);
+        if (currentBlock) {
+          // NOTE:
+          // Delaying for one cycle upon a new tetromino being spawned is part of the tetris spec.
+          if (delay) {
+            setDelay(false);
+          } else {
+            moveBlock({
+              board,
+              block: currentBlock,
+              direction: "DOWN"
+            });
+          }
+        } else {
+          spawnBlock({ board });
+          setDelay(true);
+        }
+      },
+      dropRate.increased ? dropRate.increased : dropRate.default
+    );
 
     return () => {
+      // if (dropRate.increased !== null) {
+      //   moveBlock({
+      //     board,
+      //     block: currentBlock,
+      //     direction: "DOWN"
+      //   });
+      // }
       clearInterval(interval);
     };
-  }, [board, currentBlock]);
+  }, [level, delay, dropRate, board, currentBlock]);
+
+  const updateDropRate = dropRate => (keyStatus, multiplier = null) => {
+    // if (dropRate.increased !== null && keyStatus !== "UP") {
+    //   return;
+    // }
+    if (keyStatus === "UP") {
+      console.log("resetting drop rate");
+      setDropRate({ ...dropRate, increased: null });
+    }
+    if (keyStatus === "DOWN") {
+      if (dropRate.increased !== null) {
+        console.log("new DropRate: ", dropRate.increased * multiplier);
+      }
+      // console.log("multiplier result: ", dropRate.default * multiplier);
+      setDropRate({
+        ...dropRate,
+        increased: dropRate.increased
+          ? dropRate.increased * multiplier
+          : dropRate.default * multiplier
+      });
+    }
+  };
+
+  const moveLeft = () => {
+    moveBlock({
+      board,
+      block: currentBlock,
+      direction: "LEFT"
+    });
+  };
+
+  const moveRight = () => {
+    moveBlock({
+      board,
+      block: currentBlock,
+      direction: "RIGHT"
+    });
+  };
 
   if (gameOver) {
     return <h1>Game Over!</h1>;
   }
 
   return (
-    <Board>
-      <>
-        <BoardBlock block={currentBlock} />
-        {/*
-          TODO: Should create a separate functional component for this
-          that way it can be memoized.
-        */}
-        <BoardBlock block={setBlocks} />
-      </>
-    </Board>
+    <>
+      <Controls
+        updateDropRate={updateDropRate(dropRate)}
+        moveLeft={moveLeft}
+        moveRight={moveRight}
+      />
+      <Board>
+        <>
+          {currentBlock && <BoardBlock block={currentBlock} />}
+          {/* SetBlocks is memoized to prevent unnecessary re-renders. */}
+          <SetBlocks blocks={setBlocks} />
+        </>
+      </Board>
+    </>
   );
 }
 // NOTE:
